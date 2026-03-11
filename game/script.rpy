@@ -17,6 +17,127 @@ transform midright:
     xalign 0.9
     yalign 1.0
 
+transform mug_offset:
+    xoffset 120
+    yoffset 64
+
+transform napkin_offset:
+    xoffset -120
+    yoffset 180
+
+layeredimage drink:
+    always:
+        Null(width=650, height=480) # a bit larger than the max size of all mug based items
+    at transform:
+        xanchor 0.5
+        yanchor 1.0
+
+    group tray: # what's defined first is in the background
+        attribute milk:
+            "tray_milk.png"
+
+    group plate:
+        attribute plate:
+            "mug_plate.png"
+
+    group liquid:
+        at mug_offset
+        xoffset 25
+        yoffset 11
+        attribute berry_tea:
+            "liquid_berry_tea.png"
+        attribute black_tea:
+            "liquid_black_tea.png"
+        attribute camomille_tea:
+            "liquid_camomille_tea.png"
+        attribute coffee:
+            "liquid_coffee.png"
+        attribute ginger_tea:
+            "liquid_ginger_tea.png"
+        attribute green_tea:
+            "liquid_green_tea.png"
+        attribute hot_chocolate:
+            "liquid_hot_chocolate.png"
+        attribute matcha:
+            "liquid_matcha.png"
+        attribute peppermint_tea:
+            "liquid_peppermint_tea.png"
+
+    group container:
+        at mug_offset
+        attribute mug default:
+            "mug.png"
+        attribute cup:
+            yoffset -5
+            "cup.png"
+
+    group tray_foreground:
+        attribute milk:
+            "tray_milk_foreground.png"
+
+    group addons_foreground: # note: within a group you can't show more than one attribute at once
+        at mug_offset
+        xoffset 25
+        attribute cream:
+            yoffset -49
+            "cream.png"
+        attribute marshmallows:
+            yoffset 10
+            "marshmallows.png"
+        attribute cream_marshmallows:
+            yoffset -65
+            "cream_marshmallows.png"
+
+    group napkin:
+        at napkin_offset
+        attribute napkin:
+            "napkin.png"
+
+    group sugar:
+        attribute sugar:
+            "mug_sugar.png"
+        attribute sugar_stick:
+            at napkin_offset
+            "cup_sugar.png"
+
+    group creamer:
+        at napkin_offset
+        attribute creamer:
+            "creamer.png"
+
+    group cookie:
+        attribute cookie: # we always show the cookie with the plate, but in the foreground
+            "mug_cookie.png"
+        attribute cup_cookie:
+            at napkin_offset
+            "cup_cookie.png"
+
+    group tea_bag:
+        at mug_offset
+        xoffset 180
+        yoffset 46
+        attribute berry_tea: # same attribute name as the tea liquid means it gets shown together (but this one in the foreground)
+            "teabag_berry.png"
+        attribute black_tea:
+            "teabag_black.png"
+        attribute camomille_tea:
+            "teabag_camomille.png"
+        attribute ginger_tea:
+            "teabag_ginger.png"
+        attribute green_tea:
+            "teabag_green.png"
+        attribute peppermint_tea:
+            "teabag_peppermint.png"
+
+transform mug_position:
+    xalign 0.5
+    yalign 0.93
+
+transform cup_position:
+    mug_position
+    xoffset 0
+    yoffset -165
+
 # The game starts here.
 label start:
 
@@ -258,6 +379,20 @@ label menu_select_drink:
                         pov "No thanks, no sugar for me!"
 
             jump menu_to_go
+        "Matcha":
+            pov "Do you serve matcha here?"
+            b "Yes, matcha milk tea is on our menu!"
+            pov "Perfect! Then I'd like one please."
+            $ drink_type = "matcha"
+            $ drink_name = "matcha milk tea"
+            menu:
+                b "Would you like some sugar with that?"
+                "Yes":
+                    pov "Yes, please."
+                    $ drink_addons.append("sugar")
+                "No":
+                    pov "No thanks, no sugar for me!"
+            jump menu_to_go
 
 label menu_to_go:
     menu:
@@ -346,17 +481,71 @@ label drink_done:
     show barkeeper at midleft with slow_move
     $ menu_flipped = False
 
-    "The barkeeper brings over your [drink_container] of [drink_type]."
-    if ('cream' in drink_addons or 'marshmallows' in drink_addons):
-        show barkeeper lookdown
-        "You observe them adding[' a generous amount of whipped cream' if 'cream' in drink_addons else ''][' and' if ('cream' in drink_addons and 'marshmallows' in drink_addons) else ''][' a good handful of mini-marshmallows' if 'marshmallows' in drink_addons else ''] to your drink."
+    if drink_container == "cup":
+        show drink cup at cup_position
+    else:
+        show drink mug at mug_position
 
+    if drink_type == "tea":
+        if drink_name.startswith("green"):
+            show drink green_tea
+        elif drink_name.startswith("black"):
+            show drink black_tea
+        elif drink_name.startswith("berry"):
+            show drink berry_tea
+        elif drink_name.startswith("camomille"):
+            show drink camomille_tea
+        elif drink_name.startswith("peppermint"):
+            show drink peppermint_tea
+        elif drink_name.startswith("ginger"):
+            show drink ginger_tea
+    elif drink_type == "coffee":
+        show drink coffee
+    elif drink_type == "matcha":
+        show drink matcha
+    else:
+        show drink hot_chocolate
+
+    "The barkeeper brings over your [drink_container] of [drink_type]."
+    if ("cream" in drink_addons or "marshmallows" in drink_addons):
+        show barkeeper lookdown
+        "You observe them adding "
+        if "cream" in drink_addons:
+            show drink cream
+            if "marshmallows" in drink_addons:
+                extend "a generous amount of whipped cream "
+                show drink -cream cream_marshmallows
+                extend "and a good handful of mini-marshmallows {nw}"
+            else:
+                extend "a generous amount of whipped cream {nw}"
+        else:
+            extend "a good handful of mini-marshmallows {nw}"
+            show drink marshmallows
+        extend "to your drink."
     if drink_container == "cup":
         show barkeeper lookdown
-        "As they add a napkin, a wooden stirrer[', a bag of cane sugar' if 'sugar' in drink_addons else ''][', a small milk creamer pot' if 'milk' in drink_addons else ''] and a cookie, you decide to continue the small talk."
+        show drink napkin
+        "As they add a napkin, a wooden stirrer"
+        if "sugar" in drink_addons:
+            show drink sugar_stick
+            extend ", a bag of cane sugar"
+        if "milk" in drink_addons:
+            show drink creamer
+            extend ", a small milk creamer"
+        show drink cup_cookie
     else:
         show barkeeper lookdown
-        "As they set the mug on a small tray and adorn it with a spoon[', two cubes of sugar' if 'sugar' in drink_addons else ''][', a little beaker with milk' if 'milk' in drink_addons else '']and a cookie, you decide to continue the small talk."
+        show drink plate
+        "As they set the mug on a small plate and adorn it with a spoon"
+        if "sugar" in drink_addons:
+            show drink sugar
+            extend ", two cubes of sugar"
+        if "milk" in drink_addons:
+            show drink milk
+            extend ', a little beaker with milk'
+        show drink cookie
+
+    extend " and a cookie, you decide to continue the small talk."
     jump smalltalk2
 
 label smalltalk2:
