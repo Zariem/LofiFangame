@@ -9,6 +9,8 @@ define pov = Character("[player_name]")
 
 define slow_move = MoveTransition(1.2)
 
+define fast_move = MoveTransition(0.5)
+
 transform midleft:
     xalign 0.1 # 0.0 = far left, 0.5 = center, 1.0 = far right
     yalign 1.0 # keep them aligned to the bottom
@@ -16,6 +18,14 @@ transform midleft:
 transform midright:
     xalign 0.9
     yalign 1.0
+
+transform midrightish:
+    xalign 0.6
+    yalign 1.0
+
+transform smooth_fade:
+    alpha 0.0
+    linear 1.0 alpha 1.0
 
 transform mug_offset:
     xoffset 120
@@ -141,35 +151,43 @@ transform cup_position:
     xoffset 0
     yoffset -165
 
+transform coffee_machine_pos:
+    xalign 1.03
+
+transform coffee_machine_shake:
+    coffee_machine_pos
+    linear 0.03 xoffset 0
+    linear 0.03 xoffset -3
+    repeat
+
 # The game starts here.
 label start:
+    play music "audio/outdoor_noises.mp3"
 
-    # Show a background. This uses a placeholder by default, but you can
-    # add a file (named either "bg room.png" or "bg room.jpg") to the
-    # images directory to show it.
-
-    scene bg bar
-
-    # This shows a character sprite. A placeholder is used, but you can
-    # replace it by adding a file named "eileen happy.png" to the images
-    # directory.
-
-    show barkeeper neutral at midright
     $ menu_flipped = True
 
     $ bk_name = "Barkeeper"
     $ player_name = "You"
     $ pov_name = ''
     "One day in the life of a little lofi bunny, you make your way to the Lofee coffee shop."
-    "In search of some nice ambient background with calming music, you notice that something changed..."
+    stop music fadeout 3.0
+    scene bg bar
+    show coffee_machine at coffee_machine_pos
+    show barkeeper turnedaway at midright
+    with Dissolve(3)
+    show coffee_machine at coffee_machine_shake
+    "In search of some nice ambient noises with calming music, you notice that something changed..."
     play music "audio/Louv_shifting.mp3"
-    show louv_shifting3 with Dissolve (1.5):
+    show coffee_machine at coffee_machine_pos
+    show louv_shifting3 zorder 10 with Dissolve (1.5):
         xalign 0.99
         yalign 0.99
         zoom 0.8
     "The self-serve coffee place has gained a new employee!"
     "From across the room you see them working on orders and loading and unloading the dishwasher."
-
+    show barkeeper lookdown
+    show drink coffee at mug_position:
+        xalign 1.02
     window show
     $ descriptor_text = "Hmmm.... they look "
     jump menu_bk_age
@@ -222,6 +240,7 @@ menu menu_bk_age_done:
 
 label character_chosen:
     "[descriptor_text]{fast}[followup_text]"
+    show drink plate with Dissolve(1.0)
     show barkeeper neutral
 
     "You decide to step across the room to the bar."
@@ -247,6 +266,7 @@ label character_chosen:
     else:
         show barkeeper lookdown
 
+    hide drink with Dissolve(2.0)
     "You wait for them to wrap up their current order before they come over to you."
 
     if bk_demeanor == "nervous":
@@ -398,9 +418,21 @@ label menu_select_drink:
                 b "Would you like some sugar with that?"
                 "Yes":
                     pov "Yes, please."
+                    $ drink_name += " with sugar"
                     $ drink_addons.append("sugar")
                 "No":
                     pov "No thanks, no sugar for me!"
+            menu:
+                b "And some extra milk?"
+                "Yes":
+                    pov "Oh yes, extra milk sounds good!"
+                    if "sugar" in drink_addons:
+                        $ drink_name += " and some extra milk"
+                    else:
+                        $ drink_name += " with extra milk"
+                    $ drink_addons.append("milk")
+                "No":
+                    pov "No, I'm good, thanks!"
             jump menu_to_go
 
 label menu_to_go:
@@ -427,6 +459,9 @@ label menu_to_go:
         "As the barkeeper walks to the machine, you hear them mumble your order to themselves."
 
     show barkeeper turnedaway at midright with slow_move
+    pause(1.5)
+    show coffee_machine at coffee_machine_shake
+    pause(0.5)
     $ menu_flipped = True
 
     jump menus_smalltalk
@@ -439,30 +474,35 @@ label menus_smalltalk:
             b "Oh you know, one day I was there, the other day I was here, I kinda just happened upon the job. But I like it here!"
             show barkeeper turnedaway
             pov "I see...? In any case, I'm glad you like it!"
-            show barkeeper neutral
         "How do you like this place?":
             show barkeeper smile
             b "I like it a lot. The people here are all so nice!"
             show barkeeper turnedaway
             pov "I'm glad to hear that!"
-            show barkeeper neutral
+
+    show coffee_machine at coffee_machine_pos
+    pause(1.5)
+    show barkeeper neutral
 
     menu:
         b "How about you? What are you up to today?"
         "Work":
-            show barkeeper turnedaway
+            show barkeeper turnedaway at midrightish with fast_move
+            show coffee_machine at coffee_machine_shake
             pov "I've got some work to do, so I should get some focus hours in today."
             b "Oh, good luck with that, I hope you can get a lot done today!"
             $ bye_text = "Best of luck with your work today!"
             $ end_descriptor = "get a lot of work done.\n\nYou got this!"
         "Studying":
-            show barkeeper turnedaway
+            show barkeeper turnedaway at midrightish with fast_move
+            show coffee_machine at coffee_machine_shake
             pov "I've got a lot of studying to do, so I'm gonna try my best at that!"
             b "Oh, good luck with that! I hope you'll make good progress on it today!"
             $ bye_text = "Good luck with your studies today!"
             $ end_descriptor = "study diligently.\n\nI believe in you!"
         "Reading":
-            show barkeeper turnedaway
+            show barkeeper turnedaway at midrightish with fast_move
+            show coffee_machine at coffee_machine_shake
             pov "I've got some stuff I wanna read today."
             menu:
                 b "That sounds nice. I hope your reading material is interesting!"
@@ -477,29 +517,40 @@ label menus_smalltalk:
                     $ bye_text = "Good luck with that reading you gotta do today!"
                     $ end_descriptor = "get through some heavy reading.\n\nOne page at a time!"
         "Chatting with friends":
-            show barkeeper turnedaway
+            show barkeeper turnedaway at midrightish with fast_move
+            show coffee_machine at coffee_machine_shake
             pov "I'm gonna meet up with a few friends and just hang out and catch up. It'll be good!"
             b "That sounds like a lot of fun!"
             $ bye_text = "I hope you have an amazing time with your friends!"
             $ end_descriptor = "hang out with your friends.\n\nEnjoy!!"
         "Nothing":
-            show barkeeper turnedaway
+            show barkeeper turnedaway at midrightish with fast_move
+            show coffee_machine at coffee_machine_shake
             pov "Oh nothing, really. Just grabbing a drink and seeing where to go from there!"
             b "That sounds relaxing! I hope you find something nice to spend your time with today!"
             $ bye_text = "I hope you have a lovely day!"
             $ end_descriptor = "chill and take it as it comes.\n\nSounds relaxing!"
 
-    show barkeeper slightsmile
-    jump drink_done
+    show coffee_machine at coffee_machine_pos
+    show barkeeper slightsmile with Dissolve(0.0)
 
-label drink_done:
-    show barkeeper at midleft with slow_move
-    $ menu_flipped = False
+    jump show_drink
 
     if drink_container == "cup":
-        show drink cup at cup_position
+        show drink cup at cup_position:
+            xalign 0.8
     else:
-        show drink mug at mug_position
+        show drink mug at mug_position:
+            xalign 0.8
+    pause 1.0
+
+    jump drink_done
+
+label show_drink:
+    if drink_container == "cup":
+        show drink cup
+    else:
+        show drink mug
 
     if drink_type == "tea":
         if drink_name.startswith("green"):
@@ -521,44 +572,63 @@ label drink_done:
     else:
         show drink hot_chocolate
 
+    jump drink_done
+
+label drink_done:
+    if drink_container == "cup":
+        show drink cup at cup_position:
+            xalign 0.7
+    else:
+        show drink mug at mug_position:
+            xalign 0.7
+    with Dissolve(1.0)
+
+    show barkeeper at midleft
+    $ menu_flipped = False
+    if drink_container == "cup":
+        show drink cup at cup_position
+    else:
+        show drink mug at mug_position
+    with slow_move
+
     "The barkeeper brings over your [drink_container] of [drink_type]."
     if ("cream" in drink_addons or "marshmallows" in drink_addons):
         show barkeeper lookdown
         "You observe them adding "
         if "cream" in drink_addons:
-            show drink cream
+            show drink cream with Dissolve(1.0)
             if "marshmallows" in drink_addons:
                 extend "a generous amount of whipped cream "
-                show drink -cream cream_marshmallows
+                show drink -cream cream_marshmallows with Dissolve(1.0)
                 extend "and a good handful of mini-marshmallows {nw}"
             else:
                 extend "a generous amount of whipped cream {nw}"
         else:
             extend "a good handful of mini-marshmallows {nw}"
-            show drink marshmallows
+            show drink marshmallows with Dissolve(1.0)
         extend "to your drink."
     if drink_container == "cup":
         show barkeeper lookdown
-        show drink napkin
+        show drink napkin with Dissolve(1.0)
         "They then add a napkin, a wooden stirrer"
         if "sugar" in drink_addons:
-            show drink sugar_stick
+            show drink sugar_stick with Dissolve(1.0)
             extend ", a bag of cane sugar"
         if "milk" in drink_addons:
-            show drink creamer
+            show drink creamer with Dissolve(1.0)
             extend ", a small milk creamer"
-        show drink cup_cookie
+        show drink cup_cookie with Dissolve(1.0)
     else:
         show barkeeper lookdown
-        show drink plate
+        show drink plate with Dissolve(1.0)
         "They then set the mug on a small plate and adorn it with a spoon"
         if "sugar" in drink_addons:
-            show drink sugar
+            show drink sugar with Dissolve(1.0)
             extend ", two cubes of sugar"
         if "milk" in drink_addons:
-            show drink milk
+            show drink milk with Dissolve(1.0)
             extend ', a little beaker with milk'
-        show drink cookie
+        show drink cookie with Dissolve(1.0)
 
     extend " and a cookie"
     show barkeeper slightsmile
@@ -885,7 +955,9 @@ label end:
         else:
             extend "balancing your [drink_type]."
     show drink zorder 10
-    show black as fade_screen zorder 5 with Dissolve (1.5)
+    show black as fade_screen zorder 5
+    hide louv_shifting3
+    with Dissolve (1.5)
     jump outro
 
 
@@ -904,7 +976,12 @@ label outro:
         $ end_text += "by their real name."
     else:
         $ end_text += "[bk_name] instead."
-    $ end_text += "\n\nTo you, [bk_name] looks [bk_age] and [bk_demeanor].\n\nYou ordered a\n[drink_name],\n"
+    $ end_text += "\n\nTo you, [bk_name] looks "
+    if bk_age == "middle":
+        $ end_text += "middle aged"
+    else:
+        $ end_text += "[bk_age]"
+    $ end_text += " and [bk_demeanor].\n\nYou ordered a\n[drink_name],\n"
     if drink_container == "cup":
         $ end_text += "to take away."
     else:
@@ -914,10 +991,11 @@ label outro:
     show expression Text(end_text, style="end_credits") zorder 10 as summary with Dissolve(1.5)
     ""
     $ credits_text = "{size=+10}Credits:\n\n{/size}\
-        Storytelling: Zariem\n\n\
         Art: Zariem\n\n\
+        Storytelling: Zariem\n\n\
         Programming: Zariem\n\n\
-        Soundtrack: Louv\n\n\
+        Soundtrack: Louv\n\
+        {size=-5}Ambient sounds by Cymatics{/size}\n\n\
         Inspiration: lofi.town and @deshiro's art.\n\n\n\
         {size=-5}Made with Ren'Py{/size}"
 
