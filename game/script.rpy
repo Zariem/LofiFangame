@@ -22,8 +22,8 @@ transform mug_offset:
     yoffset 64
 
 transform napkin_offset:
-    xoffset -120
-    yoffset 180
+    xoffset -110
+    yoffset 220
 
 layeredimage drink:
     always:
@@ -129,9 +129,12 @@ layeredimage drink:
         attribute peppermint_tea:
             "teabag_peppermint.png"
 
+default drink_x_align = 0.1
+default drink_y_align = 1.2
+
 transform mug_position:
-    xalign 0.5
-    yalign 0.93
+    xalign drink_x_align
+    yalign drink_y_align
 
 transform cup_position:
     mug_position
@@ -551,6 +554,11 @@ label drink_done:
 label smalltalk2:
     show barkeeper slightsmile
     "The barkeeper serves you your [drink_type]."
+    $ drink_x_align = 0.5
+    if drink_container == "cup":
+        show drink cup at cup_position with slow_move
+    else:
+        show drink mug at mug_position with slow_move
     b "There you go, one [drink_name] for you!"
     show barkeeper neutral
     pov "Thank you so much!"
