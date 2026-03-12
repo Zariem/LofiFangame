@@ -162,6 +162,11 @@ label start:
     $ pov_name = ''
     "One day in the life of a little lofi bunny, you make your way to the Lofee coffee shop."
     "In search of some nice ambient background with calming music, you notice that something changed..."
+    play music "audio/Louv_shifting.mp3"
+    show louv_shifting3 with Dissolve (1.5):
+        xalign 0.99
+        yalign 0.99
+        zoom 0.8
     "The self-serve coffee place has gained a new employee!"
     "From across the room you see them working on orders and loading and unloading the dishwasher."
 
@@ -535,7 +540,7 @@ label drink_done:
     if drink_container == "cup":
         show barkeeper lookdown
         show drink napkin
-        "As they add a napkin, a wooden stirrer"
+        "They then add a napkin, a wooden stirrer"
         if "sugar" in drink_addons:
             show drink sugar_stick
             extend ", a bag of cane sugar"
@@ -546,7 +551,7 @@ label drink_done:
     else:
         show barkeeper lookdown
         show drink plate
-        "As they set the mug on a small plate and adorn it with a spoon"
+        "They then set the mug on a small plate and adorn it with a spoon"
         if "sugar" in drink_addons:
             show drink sugar
             extend ", two cubes of sugar"
@@ -555,12 +560,12 @@ label drink_done:
             extend ', a little beaker with milk'
         show drink cookie
 
-    extend " and a cookie, you decide to continue the small talk."
+    extend " and a cookie"
+    show barkeeper slightsmile
+    extend ", before serving you your [drink_type]."
     jump smalltalk2
 
 label smalltalk2:
-    show barkeeper slightsmile
-    "The barkeeper serves you your [drink_type]."
     $ drink_x_align = 0.5
     if drink_container == "cup":
         show drink cup at cup_position with slow_move
@@ -928,7 +933,10 @@ label outro:
     show expression Text(disclaimer_text, style="end_credits_center") zorder 10 as disclaimer with Dissolve(1.5)
     ""
     hide disclaimer with Dissolve(1.5)
-    show expression Text("Thank you for playing!", style="end_credits_center") zorder 10 with Dissolve(1.5)
+    show expression Text("Thank you for playing!", style="end_credits_center") zorder 10 as thanks with Dissolve(1.5)
+    ""
+    stop music fadeout 3.0
+    hide thanks with Dissolve(3.0)
     ""
 
     # This ends the game.
