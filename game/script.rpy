@@ -159,7 +159,8 @@ label start:
 
     $ bk_name = "Barkeeper"
     $ player_name = "You"
-    "One day in the life of a little lofi bunny, you make your way to the Loffee coffee shop."
+    $ pov_name = ''
+    "One day in the life of a little lofi bunny, you make your way to the Lofee coffee shop."
     "In search of some nice ambient background with calming music, you notice that something changed..."
     "The self-serve coffee place has gained a new employee!"
     "From across the room you see them working on orders and loading and unloading the dishwasher."
@@ -316,7 +317,7 @@ label menu_select_drink:
                     pov "Just some cream, please."
                     $ drink_name += " with cream"
                     $ drink_addons.append("cream")
-                "Marshmallows please":
+                "Marshmallows":
                     pov "I'd love to have some marshmallows, but please no cream!"
                     $ drink_name += " with marshmallows"
                     $ drink_addons.append("marshmallows")
@@ -372,7 +373,7 @@ label menu_select_drink:
                     pov "I think I'll have a camomille tea."
                     $ drink_name = "camomille tea"
 
-            if drink_name != "black tea":
+            if not drink_name.startswith("black"):
                 menu:
                     b "Would you like some sugar with that?"
                     "Yes":
@@ -448,11 +449,13 @@ label menus_smalltalk:
             pov "I've got some work to do, so I should get some focus hours in today."
             b "Oh, good luck with that, I hope you can get a lot done today!"
             $ bye_text = "Best of luck with your work today!"
+            $ end_descriptor = "get a lot of work done.\n\nYou got this!"
         "Studying":
             show barkeeper turnedaway
             pov "I've got a lot of studying to do, so I'm gonna try my best at that!"
             b "Oh, good luck with that! I hope you'll make good progress on it today!"
             $ bye_text = "Good luck with your studies today!"
+            $ end_descriptor = "study diligently.\n\nI believe in you!"
         "Reading":
             show barkeeper turnedaway
             pov "I've got some stuff I wanna read today."
@@ -462,20 +465,24 @@ label menus_smalltalk:
                     pov "Yeah, I've long been looking forward to this, it'll be good!"
                     b "I'm glad to hear that!"
                     $ bye_text = "Have a wonderful time reading your book!"
+                    $ end_descriptor = "read something entertaining!\n\nNice!"
                 "Not really...":
                     pov "Actually it's a rather dry book, but I kinda have to get through it."
                     b "Aw, best of luck with it though. You got this!"
                     $ bye_text = "Good luck with that reading you gotta do today!"
+                    $ end_descriptor = "get through some heavy reading.\n\nOne page at a time!"
         "Chatting with friends":
             show barkeeper turnedaway
             pov "I'm gonna meet up with a few friends and just hang out and catch up. It'll be good!"
             b "That sounds like a lot of fun!"
             $ bye_text = "I hope you have an amazing time with your friends!"
+            $ end_descriptor = "hang out with your friends.\n\nEnjoy!!"
         "Nothing":
             show barkeeper turnedaway
             pov "Oh nothing, really. Just grabbing a drink and seeing where to go from there!"
             b "That sounds relaxing! I hope you find something nice to spend your time with today!"
             $ bye_text = "I hope you have a lovely day!"
+            $ end_descriptor = "chill and take it as it comes.\n\nSounds relaxing!"
 
     show barkeeper slightsmile
     jump drink_done
@@ -818,8 +825,7 @@ label name_done:
     extend "Now I only need {i}your{/i} name."
     show barkeeper blush
     pov "Oh, I'm..."
-    $ pov_name = ''
-    while not pov_name:
+    while pov_name == '':
         $ pov_name = renpy.input("Enter your name:", length=32).strip();
     pov "Oh, I'm {fast}[pov_name]."
     if bk_name == 'Bruno' or knows_name_bruno:
@@ -845,13 +851,18 @@ menu menu_choose_bruno_or_not:
         pov "No, I think it's more respectful to call you Bruno. But the name choosing was fun!"
         $ bk_name = "Bruno"
         b "That works for me!"
-        jump end
+        jump name_picked
     "Use [bk_name]":
         show barkeeper smile
         pov "If that's alright, I'll stick with [bk_name]. It'll be funny to explain that to anyone else."
         show barkeeper blushsmile
         b "Go ahead! I'm sure it will!"
-        jump end
+        jump name_picked
+
+label name_picked:
+    if pov_name == '':
+        jump name_done
+    jump end
 
 label end:
     show barkeeper neutral
@@ -863,8 +874,62 @@ label end:
     if drink_container == "cup":
         "You make your way out of the coffee shop with your hot cup in your hands and a smile on your face."
     else:
-        "Smiling, you make your way to a table in the coffee shop, carefully balancing your tray with your drink."
+        "Smiling, you make your way to a table in the coffee shop, carefully {nw}"
+        if "milk" in drink_addons:
+            extend "balancing your tray with your drink."
+        else:
+            extend "balancing your [drink_type]."
+    show drink zorder 10
+    show black as fade_screen zorder 5 with Dissolve (1.5)
+    jump outro
+
+
+label outro:
+    $ drink_x_align = 0.2
+    if drink_container == "cup":
+        $ drink_y_align = 0.8
+        show drink at cup_position with slow_move
+    else:
+        $ drink_y_align = 0.7
+        show drink at mug_position with slow_move
+
     "And you know it'll be a good day."
+    $ end_text = "{size=+10}[pov_name]'s Summary:{/size}\n\nYou decided to call Bruno\n"
+    if bk_name == "Bruno":
+        $ end_text += "by their real name."
+    else:
+        $ end_text += "[bk_name] instead."
+    $ end_text += "\n\nTo you, [bk_name] looks [bk_age] and [bk_demeanor].\n\nYou ordered a\n[drink_name],\n"
+    if drink_container == "cup":
+        $ end_text += "to take away."
+    else:
+        $ end_text += "to enjoy at the cafe."
+    $ end_text +="\n\nAnd today, you plan to\n[end_descriptor]"
+
+    show expression Text(end_text, style="end_credits") zorder 10 as summary with Dissolve(1.5)
+    ""
+    $ credits_text = "{size=+10}Credits:\n\n{/size}\
+        Storytelling: Zariem\n\n\
+        Art: Zariem\n\n\
+        Programming: Zariem\n\n\
+        Soundtrack: Louv\n\n\
+        Inspiration: lofi.town and @deshiro's art.\n\n\n\
+        {size=-5}Made with Ren'Py{/size}"
+
+    hide summary with Dissolve(1.5)
+    show expression Text(credits_text, style="end_credits") zorder 10 as credits with Dissolve(1.5)
+    ""
+    hide credits with Dissolve(1.5)
+    hide drink with Dissolve(1.5)
+
+    $ disclaimer_text = "No generative AI was used in this project!\n\n\
+        Please never input any art, code or music of this project into generative AI.\n\n\
+        Thank you <3"
+    show expression Text(disclaimer_text, style="end_credits_center") zorder 10 as disclaimer with Dissolve(1.5)
+    ""
+    hide disclaimer with Dissolve(1.5)
+    show expression Text("Thank you for playing!", style="end_credits_center") zorder 10 with Dissolve(1.5)
+    ""
 
     # This ends the game.
     return
