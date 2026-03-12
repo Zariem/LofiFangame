@@ -120,10 +120,33 @@ screen say(who, what):
 init python:
     config.character_id_prefixes.append('namebox')
 
+style readable_text:
+    color "#f9f7e4"
+    outlines [(4, "#7d593a33", 0, 0),
+              (3, "#7d593a66", 0, 0),
+              (2, "#7d593a99", 0, 0),
+              (1, "#7d593a", 0, 0)]
+
+style colored_text:
+    outlines [(4, "#f9f7e433", 0, 0),
+              (3, "#f9f7e466", 0, 0),
+              (2, "#f9f7e499", 0, 0),
+              (1, "#f9f7e4", 0, 0)]
+
 style window is default
-style say_label is default
-style say_dialogue is default
+style say_label is colored_text:
+    bold True
+style say_dialogue is readable_text
 style say_thought is say_dialogue
+
+style end_credits:
+    text_align 0.0
+    color "#f9f7e4"
+    size 30
+    xalign 0.7
+    yalign 0.5
+style end_credits_center is end_credits:
+    xalign 0.5
 
 style namebox is default
 style namebox_label is say_label
@@ -185,13 +208,14 @@ screen input(prompt):
             text prompt style "input_prompt"
             input id "input"
 
-style input_prompt is default
+style input_prompt is readable_text
 
 style input_prompt:
     xalign gui.dialogue_text_xalign
     properties gui.text_properties("input_prompt")
 
-style input:
+style input is colored_text:
+    bold True
     xalign gui.dialogue_text_xalign
     xmaximum gui.dialogue_width
 
@@ -263,7 +287,7 @@ screen quick_menu():
 init python:
     config.overlay_screens.append("quick_menu")
 
-default quick_menu = True
+default quick_menu = False
 
 style quick_menu is hbox
 style quick_button is default
