@@ -396,11 +396,11 @@ screen main_menu():
         vbox:
             style "main_menu_vbox"
 
-            text "[config.name!t]":
-                style "main_menu_title"
+            #text "[config.name!t]":
+            #    style "main_menu_title"
 
-            text "[config.version]":
-                style "main_menu_version"
+            #text "[config.version]":
+            #    style "main_menu_version"
 
 
 style main_menu_frame is empty

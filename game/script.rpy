@@ -170,19 +170,25 @@ label start:
     $ player_name = "You"
     $ pov_name = ''
     "One day in the life of a little lofi bunny, you make your way to the Lofee coffee shop."
+    play audio "audio/door_open_close.mp3"
+    play sound "audio/restaurant.mp3" loop fadein 1.5 volume 0.3
     stop music fadeout 3.0
     scene bg bar
     show coffee_machine at coffee_machine_pos
     show barkeeper turnedaway at midright
     with Dissolve(3)
     show coffee_machine at coffee_machine_shake
+    play audio "audio/coffee_machine.mp3"
+    pause 7.0
+    show coffee_machine at coffee_machine_pos
     "In search of some nice ambient noises with calming music, you notice that something changed..."
     play music "audio/Louv_shifting.mp3"
-    show coffee_machine at coffee_machine_pos
     show louv_shifting3 zorder 10 with Dissolve (1.5):
         xalign 0.99
         yalign 0.99
         zoom 0.8
+    stop sound fadeout 8.0
+
     "The self-serve coffee place has gained a new employee!"
     "From across the room you see them working on orders and loading and unloading the dishwasher."
     show barkeeper lookdown
@@ -461,6 +467,7 @@ label menu_to_go:
     show barkeeper turnedaway at midright with slow_move
     pause(1.5)
     show coffee_machine at coffee_machine_shake
+    play audio "audio/coffee_machine.mp3"
     pause(0.5)
     $ menu_flipped = True
 
@@ -481,6 +488,7 @@ label menus_smalltalk:
             pov "I'm glad to hear that!"
 
     show coffee_machine at coffee_machine_pos
+    stop audio
     pause(1.5)
     show barkeeper neutral
 
@@ -489,6 +497,7 @@ label menus_smalltalk:
         "Work":
             show barkeeper turnedaway at midrightish with fast_move
             show coffee_machine at coffee_machine_shake
+            play audio "audio/milk_frother.mp3"
             pov "I've got some work to do, so I should get some focus hours in today."
             b "Oh, good luck with that, I hope you can get a lot done today!"
             $ bye_text = "Best of luck with your work today!"
@@ -496,6 +505,7 @@ label menus_smalltalk:
         "Studying":
             show barkeeper turnedaway at midrightish with fast_move
             show coffee_machine at coffee_machine_shake
+            play audio "audio/milk_frother.mp3"
             pov "I've got a lot of studying to do, so I'm gonna try my best at that!"
             b "Oh, good luck with that! I hope you'll make good progress on it today!"
             $ bye_text = "Good luck with your studies today!"
@@ -503,6 +513,7 @@ label menus_smalltalk:
         "Reading":
             show barkeeper turnedaway at midrightish with fast_move
             show coffee_machine at coffee_machine_shake
+            play audio "audio/milk_frother.mp3"
             pov "I've got some stuff I wanna read today."
             menu:
                 b "That sounds nice. I hope your reading material is interesting!"
@@ -519,6 +530,7 @@ label menus_smalltalk:
         "Chatting with friends":
             show barkeeper turnedaway at midrightish with fast_move
             show coffee_machine at coffee_machine_shake
+            play audio "audio/milk_frother.mp3"
             pov "I'm gonna meet up with a few friends and just hang out and catch up. It'll be good!"
             b "That sounds like a lot of fun!"
             $ bye_text = "I hope you have an amazing time with your friends!"
@@ -526,12 +538,14 @@ label menus_smalltalk:
         "Nothing":
             show barkeeper turnedaway at midrightish with fast_move
             show coffee_machine at coffee_machine_shake
+            play audio "audio/milk_frother.mp3"
             pov "Oh nothing, really. Just grabbing a drink and seeing where to go from there!"
             b "That sounds relaxing! I hope you find something nice to spend your time with today!"
             $ bye_text = "I hope you have a lovely day!"
             $ end_descriptor = "chill and take it as it comes.\n\nSounds relaxing!"
 
     show coffee_machine at coffee_machine_pos
+    stop audio
     show barkeeper slightsmile with Dissolve(0.0)
 
     jump show_drink
@@ -962,12 +976,13 @@ label end:
 
 
 label outro:
-    $ drink_x_align = 0.2
     if drink_container == "cup":
+        $ drink_x_align = 0.25
         $ drink_y_align = 0.8
         show drink at cup_position with slow_move
     else:
-        $ drink_y_align = 0.7
+        $ drink_x_align = 0.1
+        $ drink_y_align = 0.6
         show drink at mug_position with slow_move
 
     "And you know it'll be a good day."
@@ -995,7 +1010,7 @@ label outro:
         Storytelling: Zariem\n\n\
         Programming: Zariem\n\n\
         Soundtrack: Louv\n\
-        {size=-5}Ambient sounds by Cymatics{/size}\n\n\
+        {size=-5}Ambient sounds by Cymatics and from pixabay{/size}\n\n\
         Inspiration: lofi.town and @deshiro's art.\n\n\n\
         {size=-5}Made with Ren'Py{/size}"
 
